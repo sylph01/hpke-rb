@@ -103,7 +103,7 @@ context_r.open('authentication_associated_data', ciphertext)
 - Hash names (parameter 2 and 3)
     - `:sha256`, `:sha384`, `:sha512`
 - AEAD function names (parameter 4)
-    - `:aes_128_gcm`, `:aes_256_gcm`, `:chacha20_poly1305`, `:`
+    - `:aes_128_gcm`, `:aes_256_gcm`, `:chacha20_poly1305`, `:export_only`
 
 ## Development
 
