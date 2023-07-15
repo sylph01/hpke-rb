@@ -65,7 +65,7 @@ class HPKE::DHKEM
   end
 
   def encap_fixed(pk_r, ikm_e)
-    pkey_e = create_key_pair_from_secret(ikm_e)
+    pkey_e = derive_key_pair(ikm_e)
     dh = pkey_e.derive(pk_r)
     enc = serialize_public_key(pkey_e)
 
@@ -80,7 +80,7 @@ class HPKE::DHKEM
   end
 
   def auth_encap_fixed(pk_r, sk_s, ikm_e)
-    pkey_e = create_key_pair_from_secret(ikm_e)
+    pkey_e = derive_key_pair(ikm_e)
     dh = pkey_e.derive(pk_r) + sk_s.derive(pk_r)
     enc = serialize_public_key(pkey_e)
 
