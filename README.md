@@ -1,5 +1,7 @@
 # hpke-rb
 
+[![Gem Version](https://badge.fury.io/rb/hpke.svg)](https://badge.fury.io/rb/hpke)
+
 Hybrid Public Key Encryption (HPKE; [RFC 9180](https://datatracker.ietf.org/doc/html/rfc9180)) in Ruby
 
 ## Note
