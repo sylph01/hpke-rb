@@ -107,18 +107,6 @@ class HPKE::DHKEM
     create_key_pair_from_secret(sk)
   end
 
-  def create_key_pair_from_secret(secret)
-    asn1_seq = OpenSSL::ASN1.Sequence([
-      OpenSSL::ASN1.Integer(0),
-      OpenSSL::ASN1.Sequence([
-        OpenSSL::ASN1.ObjectId(asn1_oid)
-      ]),
-      OpenSSL::ASN1.OctetString("\x04\x20" + secret) # TODO: different value for X448?
-    ])
-
-    OpenSSL::PKey.read(asn1_seq.to_der)
-  end
-
   def serialize_public_key(pk)
     pk.public_to_der[-n_pk, n_pk]
   end
@@ -304,6 +292,18 @@ class HPKE::DHKEM::X25519 < HPKE::DHKEM
     0x0020
   end
 
+  def create_key_pair_from_secret(secret)
+    asn1_seq = OpenSSL::ASN1.Sequence([
+      OpenSSL::ASN1.Integer(0),
+      OpenSSL::ASN1.Sequence([
+        OpenSSL::ASN1.ObjectId(asn1_oid)
+      ]),
+      OpenSSL::ASN1.OctetString("\x04\x20" + secret)
+    ])
+
+    OpenSSL::PKey.read(asn1_seq.to_der)
+  end
+
   private
 
   def n_secret
@@ -330,6 +330,18 @@ end
 class HPKE::DHKEM::X448 < HPKE::DHKEM
   def kem_id
     0x0021
+  end
+
+  def create_key_pair_from_secret(secret)
+    asn1_seq = OpenSSL::ASN1.Sequence([
+      OpenSSL::ASN1.Integer(0),
+      OpenSSL::ASN1.Sequence([
+        OpenSSL::ASN1.ObjectId(asn1_oid)
+      ]),
+      OpenSSL::ASN1.OctetString("\x04\x38" + secret)
+    ])
+
+    OpenSSL::PKey.read(asn1_seq.to_der)
   end
 
   private
