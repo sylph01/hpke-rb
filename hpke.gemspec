@@ -4,7 +4,7 @@ require_relative "lib/hpke/version"
 
 Gem::Specification.new do |spec|
   spec.name = "hpke"
-  spec.version = Hpke::VERSION
+  spec.version = HPKE::VERSION
   spec.authors = ["Ryo Kajiwara"]
   spec.email = ["sylph01@s01.ninja"]
 

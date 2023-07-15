@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Hpke do
+RSpec.describe HPKE do
   it "has a version number" do
-    expect(Hpke::VERSION).not_to be nil
-  end
-
-  it "does something useful" do
-    expect(false).to eq(true)
+    expect(HPKE::VERSION).not_to be nil
   end
 end
