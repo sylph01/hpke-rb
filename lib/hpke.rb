@@ -168,6 +168,30 @@ class HPKE
     @hkdf.labeled_expand(exporter_secret, 'sec', exporter_context, len, suite_id)
   end
 
+  def aead_encrypt(key, nonce, aad, pt)
+    cipher = OpenSSL::Cipher.new(aead_name)
+    cipher.encrypt
+    cipher.key = key
+    cipher.iv = nonce
+    cipher.auth_data = aad
+    cipher.padding = 0
+    s = cipher.update(pt) << cipher.final
+    s + cipher.auth_tag
+  end
+
+  def aead_decrypt(key, nonce, aad, ct)
+    ct_body = ct[0, ct.length - n_t]
+    tag = ct[-n_t, n_t]
+    cipher = OpenSSL::Cipher.new(aead_name)
+    cipher.decrypt
+    cipher.key = key
+    cipher.iv = nonce
+    cipher.auth_tag = tag
+    cipher.auth_data = aad
+    cipher.padding = 0
+    cipher.update(ct_body) << cipher.final
+  end
+
   private
 
   def suite_id
@@ -254,22 +278,9 @@ class HPKE::ContextS < HPKE::Context
   def seal(aad, pt)
     raise Exception.new('AEAD is export only') if @hpke.aead_name == :export_only
 
-    ct = cipher_seal(@key, compute_nonce(@sequence_number), aad, pt)
+    ct = @hpke.aead_encrypt(@key, compute_nonce(@sequence_number), aad, pt)
     increment_seq
     ct
-  end
-
-  private
-
-  def cipher_seal(key, nonce, aad, pt)
-    cipher = OpenSSL::Cipher.new(@hpke.aead_name)
-    cipher.encrypt
-    cipher.key = key
-    cipher.iv = nonce
-    cipher.auth_data = aad
-    cipher.padding = 0
-    s = cipher.update(pt) << cipher.final
-    s + cipher.auth_tag
   end
 end
 
@@ -277,24 +288,9 @@ class HPKE::ContextR < HPKE::Context
   def open(aad, ct)
     raise Exception.new('AEAD is export only') if @hpke.aead_name == :export_only
 
-    pt = cipher_open(@key, compute_nonce(@sequence_number), aad, ct)
+    pt = @hpke.aead_decrypt(@key, compute_nonce(@sequence_number), aad, ct)
     # TODO: catch openerror then send out own openerror
     increment_seq
     pt
-  end
-
-  private
-
-  def cipher_open(key, nonce, aad, ct)
-    ct_body = ct[0, ct.length - @hpke.n_t]
-    tag = ct[-@hpke.n_t, @hpke.n_t]
-    cipher = OpenSSL::Cipher.new(@hpke.aead_name)
-    cipher.decrypt
-    cipher.key = key
-    cipher.iv = nonce
-    cipher.auth_tag = tag
-    cipher.auth_data = aad
-    cipher.padding = 0
-    cipher.update(ct_body) << cipher.final
   end
 end
