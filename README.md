@@ -75,9 +75,9 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ```ruby
 # instantiate HPKE suite
-# first 2 parameters specify the curve and hash to be used in the KEM,
-# third parameter specifies the hash to be used in the KDF (of HPKE suite),
-# fourth parameter specifies the AEAD function
+# first parameter takes the KEM ID specified in RFC 9180 Section 7.1 Table 2,
+# second parameter takes the KDF ID specified in RFC 9180 Section 7.2 Table 3,
+# third parameter takes the AEAD ID specified in RFC 9180 Section 7.3 Table 5.
 
 # we will generate a different instance just for demonstration to show that nothing secret is stored in the HPKE suite instance
 hpke_s = HPKE.new(HPKE::DHKEM_X25519_HKDF_SHA256, HPKE::HKDF_SHA256, HPKE::AES_128_GCM)
