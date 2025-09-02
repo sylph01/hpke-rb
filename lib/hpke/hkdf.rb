@@ -52,39 +52,3 @@ class HPKE::HKDF
     expand(prk, labeled_info, l)
   end
 end
-
-class HPKE::HKDF::HMAC_SHA256 < HPKE::HKDF
-  private
-
-  def digest_algorithm
-    'SHA256'
-  end
-
-  def kdf_id
-    1
-  end
-end
-
-class HPKE::HKDF::HMAC_SHA384 < HPKE::HKDF
-  private
-
-  def digest_algorithm
-    'SHA384'
-  end
-
-  def kdf_id
-    2
-  end
-end
-
-class HPKE::HKDF::HMAC_SHA512 < HPKE::HKDF
-  private
-  
-  def digest_algorithm
-    'SHA512'
-  end
-
-  def kdf_id
-    3
-  end
-end
