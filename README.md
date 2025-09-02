@@ -6,11 +6,26 @@ Hybrid Public Key Encryption (HPKE; [RFC 9180](https://datatracker.ietf.org/doc/
 
 ## Note
 
-This is still in very early development, so:
+This is tested against test vectors supplied by the authors of the RFC, but is not formally audited for security. Please be aware of this when using in production.
 
-- APIs are subject to change
-    - Especially the instantation interface of KEM and HPKE suite
-- This is tested against test vectors supplied by the authors of the RFC, but is not formally audited for security. Please be aware of this when using in production.
+### Breaking Changes in Version 1.0.0(-rc1)
+
+Previously, the instantiation of HPKE instance took four arguments, the curve for DHKEM, the hash function for DHKEM's HKDF, the hash function for the HKDF of HPKE, and the AEAD algorithm:
+
+```ruby
+hpke = HPKE.new(:x25519, :sha256, :sha256, :aes_128_gcm)
+```
+
+From 1.0.0, the instantiation of the HPKE instance will be done by passing algorithm identifiers (specified in the RFC, in Section 7.1, 7.2, and 7.3):
+
+```ruby
+hpke = HPKE.new(HPKE::DHKEM_X25519_HKDF_SHA256, HPKE::HKDF_SHA256, HPKE::AES_128_GCM)
+
+# also equivalent to:
+hpke = HPKE.new(0x0020, 0x0001, 0x0001)
+```
+
+The name of constants (and its values) are listed in the next section.
 
 ## Supported Features
 
@@ -22,20 +37,20 @@ Supports all modes, KEMs, AEAD functions in RFC 9180.
     - Auth
     - AuthPSK
 - Key Encapsulation Mechanisms (KEMs)
-    - DHKEM(P-256, HKDF-SHA256)
-    - DHKEM(P-384, HKDF-SHA384)
-    - DHKEM(P-521, HKDF-SHA512)
-    - DHKEM(X25519, HKDF-SHA256)
-    - DHKEM(X448, HKDF-SHA512)
+    - DHKEM(P-256, HKDF-SHA256) `DHKEM_P256_HKDF_SHA256` (= `0x0010`)
+    - DHKEM(P-384, HKDF-SHA384) `DHKEM_P384_HKDF_SHA384` (= `0x0011`)
+    - DHKEM(P-521, HKDF-SHA512) `DHKEM_P521_HKDF_SHA512` (= `0x0012`)
+    - DHKEM(X25519, HKDF-SHA256) `DHKEM_X25519_HKDF_SHA256` (= `0x0020`)
+    - DHKEM(X448, HKDF-SHA512) `DHKEM_X448_HKDF_SHA512` (= `0x0021`)
 - Key Derivation Functions (KDFs)
-    - HKDF-SHA256
-    - HKDF-SHA384
-    - HKDF-SHA512
+    - HKDF-SHA256 `HKDF_SHA256` (= `0x0001`)
+    - HKDF-SHA384 `HKDF_SHA384` (= `0x0002`)
+    - HKDF-SHA512 `HKDF_SHA512` (= `0x0003`)
 - AEAD Functions
-    - AES-128-GCM
-    - AES-256-GCM
-    - ChaCha20-Poly1305
-    - Export Only
+    - AES-128-GCM `AES_128_GCM` (= `0x0001`)
+    - AES-256-GCM `AES_256_GCM` (= `0x0002`)
+    - ChaCha20-Poly1305 `CHACHA20_POLY1305` (= `0x0003`)
+    - Export Only `EXPORT_ONLY`(= `0xffff`)
 
 ## Supported Environments
 
@@ -65,8 +80,8 @@ If bundler is not being used to manage dependencies, install the gem by executin
 # fourth parameter specifies the AEAD function
 
 # we will generate a different instance just for demonstration to show that nothing secret is stored in the HPKE suite instance
-hpke_s = HPKE.new(:x25519, :sha256, :sha256, :aes_128_gcm)
-hpke_r = HPKE.new(:x25519, :sha256, :sha256, :aes_128_gcm)
+hpke_s = HPKE.new(HPKE::DHKEM_X25519_HKDF_SHA256, HPKE::HKDF_SHA256, HPKE::AES_128_GCM)
+hpke_r = HPKE.new(HPKE::DHKEM_X25519_HKDF_SHA256, HPKE::HKDF_SHA256, HPKE::AES_128_GCM)
 
 # get a OpenSSL::PKey::PKey instance by either generating a key or loading a key from a PEM
 # see https://ruby-doc.org/3.2.2/exts/openssl/OpenSSL/PKey/PKey.html
@@ -98,14 +113,6 @@ ciphertext = context_s.seal('authentication_associated_data', 'plaintext')
 # then receiver decrypts the ciphertext
 context_r.open('authentication_associated_data', ciphertext)
 ```
-
-- Curve names (parameter 1)
-    - `:p_256`, `:p_384`, `:p_521`, `:x25519`, `:x448`
-        - Note: `:p_256` corresponds to `prime256v1`, `:p_384` corresponds to `secp384r1`, and `:p_521` corresponds to `secp521r1` in OpenSSL
-- Hash names (parameter 2 and 3)
-    - `:sha256`, `:sha384`, `:sha512`
-- AEAD function names (parameter 4)
-    - `:aes_128_gcm`, `:aes_256_gcm`, `:chacha20_poly1305`, `:export_only`
 
 ## Development
 

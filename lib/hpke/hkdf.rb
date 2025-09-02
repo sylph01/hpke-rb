@@ -6,32 +6,22 @@ class HPKE::HKDF
 
   attr_reader :kdf_id
 
-  ALGORITHMS = {
-    sha256: {
-      name: 'SHA256',
-      kdf_id: 1
-    },
-    sha384: {
-      name: 'SHA384',
-      kdf_id: 2
-    },
-    sha512: {
-      name: 'SHA512',
-      kdf_id: 3
-    }
-  }
-
   def n_h
     @digest.digest_length
   end
 
-  def initialize(alg_name)
-    if algorithm = ALGORITHMS[alg_name]
-      @digest = OpenSSL::Digest.new(algorithm[:name])
-      @kdf_id = algorithm[:kdf_id]
+  def initialize(kdf_id)
+    case kdf_id
+    when HPKE::HKDF_SHA256
+      @digest = OpenSSL::Digest.new('SHA256')
+    when HPKE::HKDF_SHA384
+      @digest = OpenSSL::Digest.new('SHA384')
+    when HPKE::HKDF_SHA512
+      @digest = OpenSSL::Digest.new('SHA512')
     else
       raise Exception.new('Unknown hash algorithm')
     end
+    @kdf_id = kdf_id
   end
 
   def hmac(key, data)
@@ -60,41 +50,5 @@ class HPKE::HKDF
   def labeled_expand(prk, label, info, l, suite_id)
     labeled_info = i2osp(l, 2) + 'HPKE-v1' + suite_id + label + info
     expand(prk, labeled_info, l)
-  end
-end
-
-class HPKE::HKDF::HMAC_SHA256 < HPKE::HKDF
-  private
-
-  def digest_algorithm
-    'SHA256'
-  end
-
-  def kdf_id
-    1
-  end
-end
-
-class HPKE::HKDF::HMAC_SHA384 < HPKE::HKDF
-  private
-
-  def digest_algorithm
-    'SHA384'
-  end
-
-  def kdf_id
-    2
-  end
-end
-
-class HPKE::HKDF::HMAC_SHA512 < HPKE::HKDF
-  private
-  
-  def digest_algorithm
-    'SHA512'
-  end
-
-  def kdf_id
-    3
   end
 end
