@@ -9,7 +9,7 @@ require_relative './hpke/util'
 class HPKE
   include HPKE::Util
 
-  attr_reader :kem, :hkdf, :aead_name, :n_k, :n_n, :n_t
+  attr_reader :kem, :hkdf, :aead_id, :aead_name, :n_k, :n_n, :n_t
 
   # Algorithm Identifiers
   # DHKEM
@@ -41,38 +41,34 @@ class HPKE
   AVAILABLE_AEAD = [
     AES_128_GCM, AES_256_GCM, CHACHA20_POLY1305, EXPORT_ONLY
   ]
+  CIPHERS = {
+    AES_128_GCM => {
+      name: 'aes-128-gcm',
+      n_k: 16,
+      n_n: 12,
+      n_t: 16
+    },
+    AES_256_GCM => {
+      name: 'aes-256-gcm',
+      n_k: 32,
+      n_n: 12,
+      n_t: 16
+    },
+    CHACHA20_POLY1305 => {
+      name: 'chacha20-poly1305',
+      n_k: 32,
+      n_n: 12,
+      n_t: 16
+    },
+    EXPORT_ONLY => {
+    }
+  }
 
   MODES = {
     base: 0x00,
     psk: 0x01,
     auth: 0x02,
     auth_psk: 0x03
-  }
-  CIPHERS = {
-    aes_128_gcm: {
-      name: 'aes-128-gcm',
-      aead_id: 0x0001,
-      n_k: 16,
-      n_n: 12,
-      n_t: 16
-    },
-    aes_256_gcm: {
-      name: 'aes-256-gcm',
-      aead_id: 0x0002,
-      n_k: 32,
-      n_n: 12,
-      n_t: 16
-    },
-    chacha20_poly1305: {
-      name: 'chacha20-poly1305',
-      aead_id: 0x0003,
-      n_k: 32,
-      n_n: 12,
-      n_t: 16
-    },
-    export_only: {
-      aead_id: 0xffff
-    }
   }
 
   def initialize(kem_id, kdf_id, aead_id)
@@ -92,12 +88,11 @@ class HPKE
              when HKDF_SHA512 then HKDF.new(HKDF_SHA512)
              else raise Exception.new('Unsupported KDF')
              end
-    cipher_name = CIPHERS.key(CIPHERS.find { |_, v| v[:aead_id] == aead_id }[1])
     @aead_id = aead_id
-    @aead_name = CIPHERS[cipher_name][:name]
-    @n_k = CIPHERS[cipher_name][:n_k]
-    @n_n = CIPHERS[cipher_name][:n_n]
-    @n_t = CIPHERS[cipher_name][:n_t]
+    @aead_name = CIPHERS[aead_id][:name]
+    @n_k = CIPHERS[aead_id][:n_k]
+    @n_n = CIPHERS[aead_id][:n_n]
+    @n_t = CIPHERS[aead_id][:n_t]
   end
 
   # public facing APIs
@@ -243,7 +238,7 @@ class HPKE
 
     secret = @hkdf.labeled_extract(shared_secret, 'secret', psk, suite_id)
 
-    unless @aead_id == CIPHERS[:export_only][:aead_id]
+    unless @aead_id == EXPORT_ONLY
       key = @hkdf.labeled_expand(secret, 'key', key_schedule_context, @n_k, suite_id)
       base_nonce = @hkdf.labeled_expand(secret, 'base_nonce', key_schedule_context, @n_n, suite_id)
     end
@@ -298,7 +293,7 @@ end
 
 class HPKE::ContextS < HPKE::Context
   def seal(aad, pt)
-    raise Exception.new('AEAD is export only') if @hpke.aead_name == :export_only
+    raise Exception.new('AEAD is export only') if @hpke.aead_id == HPKE::EXPORT_ONLY
 
     ct = @hpke.aead_encrypt(@key, compute_nonce(@sequence_number), aad, pt)
     increment_seq
@@ -308,7 +303,7 @@ end
 
 class HPKE::ContextR < HPKE::Context
   def open(aad, ct)
-    raise Exception.new('AEAD is export only') if @hpke.aead_name == :export_only
+    raise Exception.new('AEAD is export only') if @hpke.aead_id == HPKE::EXPORT_ONLY
 
     pt = @hpke.aead_decrypt(@key, compute_nonce(@sequence_number), aad, ct)
     # TODO: catch openerror then send out own openerror
