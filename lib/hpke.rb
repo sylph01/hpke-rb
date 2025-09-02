@@ -11,6 +11,36 @@ class HPKE
 
   attr_reader :kem, :hkdf, :aead_name, :n_k, :n_n, :n_t
 
+  # Algorithm Identifiers
+  # DHKEM
+  # RFC 9180, Section 7.1 Table 2
+  DHKEM_P256_HKDF_SHA256 = 0x0010
+  DHKEM_P384_HKDF_SHA384 = 0x0011
+  DHKEM_P521_HKDF_SHA512 = 0x0012
+  DHKEM_X25519_HKDF_SHA256 = 0x0020
+  DHKEM_X448_HKDF_SHA512 = 0x0021
+  AVAILABLE_KEM = [
+    DHKEM_P256_HKDF_SHA256, DHKEM_P384_HKDF_SHA384, DHKEM_P521_HKDF_SHA512, DHKEM_X25519_HKDF_SHA256, DHKEM_X448_HKDF_SHA512
+  ]
+
+  # HKDF
+  # RFC 9180, Section 7.2, Table 3
+  HKDF_SHA256 = 0x0001
+  HKDF_SHA384 = 0x0002
+  HKDF_SHA512 = 0x0003
+  AVAILABLE_KDF = [
+    HKDF_SHA256, HKDF_SHA384, HKDF_SHA512
+  ]
+
+  # AEAD
+  # RFC 9180, Section 7.3, Table 5
+  AES_128_GCM = 0x0001
+  AES_256_GCM = 0x0002
+  CHACHA20_POLY1305 = 0x0003
+  AVAILABLE_AEAD = [
+    AES_128_GCM, AES_256_GCM, CHACHA20_POLY1305
+  ]
+
   MODES = {
     base: 0x00,
     psk: 0x01,
@@ -65,17 +95,28 @@ class HPKE
     x448: DHKEM::X448
   }
 
-  def initialize(kem_curve_name, kem_hash, kdf_hash, aead_cipher)
-    raise Exception.new('Unsupported KEM curve name') if KEM_CURVES[kem_curve_name].nil?
-    raise Exception.new('Unsupported AEAD cipher name') if CIPHERS[aead_cipher].nil?
+  def initialize(kem_id, kdf_id, aead_id)
+    raise Exception.new('Unsupported AEAD') unless AVAILABLE_AEAD.include?(aead_id)
 
-    @kem = KEM_CURVES[kem_curve_name].new(kem_hash)
-    @hkdf = HKDF.new(kdf_hash)
-    @aead_name = CIPHERS[aead_cipher][:name]
-    @aead_id = CIPHERS[aead_cipher][:aead_id]
-    @n_k = CIPHERS[aead_cipher][:n_k]
-    @n_n = CIPHERS[aead_cipher][:n_n]
-    @n_t = CIPHERS[aead_cipher][:n_t]
+    @kem = case kem_id
+            when DHKEM_P256_HKDF_SHA256 then DHKEM::EC::P_256.new(:sha256)
+            when DHKEM_P384_HKDF_SHA384 then DHKEM::EC::P_384.new(:sha384)
+            when DHKEM_P521_HKDF_SHA512 then DHKEM::EC::P_521.new(:sha512)
+            when DHKEM_X25519_HKDF_SHA256 then DHKEM::X25519.new(:sha256)
+            when DHKEM_X448_HKDF_SHA512 then DHKEM::X448.new(:sha512)
+            else raise Exception.new('Unsupported KEM')
+            end
+    @hkdf = case kdf_id
+             when HKDF_SHA256 then HKDF.new(:sha256)
+             when HKDF_SHA384 then HKDF.new(:sha384)
+             when HKDF_SHA512 then HKDF.new(:sha512)
+             else raise Exception.new('Unsupported KDF')
+             end
+    @aead_name = CIPHERS.key(CIPHERS.find { |_, v| v[:aead_id] == aead_id }[1])
+    @aead_id = aead_id
+    @n_k = CIPHERS[@aead_name][:n_k]
+    @n_n = CIPHERS[@aead_name][:n_n]
+    @n_t = CIPHERS[@aead_name][:n_t]
   end
 
   # public facing APIs
