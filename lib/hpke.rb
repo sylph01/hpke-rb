@@ -100,17 +100,17 @@ class HPKE
     raise Exception.new('Unsupported AEAD') unless AVAILABLE_AEAD.include?(aead_id)
 
     @kem = case kem_id
-            when DHKEM_P256_HKDF_SHA256 then DHKEM::EC::P_256.new(:sha256)
-            when DHKEM_P384_HKDF_SHA384 then DHKEM::EC::P_384.new(:sha384)
-            when DHKEM_P521_HKDF_SHA512 then DHKEM::EC::P_521.new(:sha512)
-            when DHKEM_X25519_HKDF_SHA256 then DHKEM::X25519.new(:sha256)
-            when DHKEM_X448_HKDF_SHA512 then DHKEM::X448.new(:sha512)
+            when DHKEM_P256_HKDF_SHA256 then DHKEM::EC::P_256.new(HKDF_SHA256)
+            when DHKEM_P384_HKDF_SHA384 then DHKEM::EC::P_384.new(HKDF_SHA384)
+            when DHKEM_P521_HKDF_SHA512 then DHKEM::EC::P_521.new(HKDF_SHA512)
+            when DHKEM_X25519_HKDF_SHA256 then DHKEM::X25519.new(HKDF_SHA256)
+            when DHKEM_X448_HKDF_SHA512 then DHKEM::X448.new(HKDF_SHA512)
             else raise Exception.new('Unsupported KEM')
             end
     @hkdf = case kdf_id
-             when HKDF_SHA256 then HKDF.new(:sha256)
-             when HKDF_SHA384 then HKDF.new(:sha384)
-             when HKDF_SHA512 then HKDF.new(:sha512)
+             when HKDF_SHA256 then HKDF.new(HKDF_SHA256)
+             when HKDF_SHA384 then HKDF.new(HKDF_SHA384)
+             when HKDF_SHA512 then HKDF.new(HKDF_SHA512)
              else raise Exception.new('Unsupported KDF')
              end
     cipher_name = CIPHERS.key(CIPHERS.find { |_, v| v[:aead_id] == aead_id }[1])

@@ -6,32 +6,22 @@ class HPKE::HKDF
 
   attr_reader :kdf_id
 
-  ALGORITHMS = {
-    sha256: {
-      name: 'SHA256',
-      kdf_id: 1
-    },
-    sha384: {
-      name: 'SHA384',
-      kdf_id: 2
-    },
-    sha512: {
-      name: 'SHA512',
-      kdf_id: 3
-    }
-  }
-
   def n_h
     @digest.digest_length
   end
 
-  def initialize(alg_name)
-    if algorithm = ALGORITHMS[alg_name]
-      @digest = OpenSSL::Digest.new(algorithm[:name])
-      @kdf_id = algorithm[:kdf_id]
+  def initialize(kdf_id)
+    case kdf_id
+    when HPKE::HKDF_SHA256
+      @digest = OpenSSL::Digest.new('SHA256')
+    when HPKE::HKDF_SHA384
+      @digest = OpenSSL::Digest.new('SHA384')
+    when HPKE::HKDF_SHA512
+      @digest = OpenSSL::Digest.new('SHA512')
     else
       raise Exception.new('Unknown hash algorithm')
     end
+    @kdf_id = kdf_id
   end
 
   def hmac(key, data)

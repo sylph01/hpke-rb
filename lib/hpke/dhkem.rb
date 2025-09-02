@@ -6,8 +6,11 @@ require_relative 'util'
 class HPKE::DHKEM
   include HPKE::Util
 
-  def initialize(hash_name)
-    @hkdf = HPKE::HKDF.new(hash_name)
+  def initialize(kdf_id)
+    # Currently all KDFs are HKDF so this works fine,
+    # but when other KDFs are added, this should be fixed
+    @hkdf = HPKE::HKDF.new(kdf_id)
+    raise Exception.new('KDF not compatible with DHKEM curve') unless @hkdf.n_h == self.n_secret
   end
 
   def encap(pk_r)
