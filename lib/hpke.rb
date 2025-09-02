@@ -74,27 +74,6 @@ class HPKE
       aead_id: 0xffff
     }
   }
-  HASHES = {
-    sha256: {
-      name: 'SHA256',
-      kdf_id: 1
-    },
-    sha384: {
-      name: 'SHA384',
-      kdf_id: 2
-    },
-    sha512: {
-      name: 'SHA512',
-      kdf_id: 3
-    }
-  }
-  KEM_CURVES = {
-    p_256: DHKEM::EC::P_256,
-    p_384: DHKEM::EC::P_384,
-    p_521: DHKEM::EC::P_521,
-    x25519: DHKEM::X25519,
-    x448: DHKEM::X448
-  }
 
   def initialize(kem_id, kdf_id, aead_id)
     raise Exception.new('Unsupported AEAD') unless AVAILABLE_AEAD.include?(aead_id)
