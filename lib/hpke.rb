@@ -37,8 +37,9 @@ class HPKE
   AES_128_GCM = 0x0001
   AES_256_GCM = 0x0002
   CHACHA20_POLY1305 = 0x0003
+  EXPORT_ONLY = 0xffff
   AVAILABLE_AEAD = [
-    AES_128_GCM, AES_256_GCM, CHACHA20_POLY1305
+    AES_128_GCM, AES_256_GCM, CHACHA20_POLY1305, EXPORT_ONLY
   ]
 
   MODES = {
@@ -112,11 +113,12 @@ class HPKE
              when HKDF_SHA512 then HKDF.new(:sha512)
              else raise Exception.new('Unsupported KDF')
              end
-    @aead_name = CIPHERS.key(CIPHERS.find { |_, v| v[:aead_id] == aead_id }[1])
+    cipher_name = CIPHERS.key(CIPHERS.find { |_, v| v[:aead_id] == aead_id }[1])
     @aead_id = aead_id
-    @n_k = CIPHERS[@aead_name][:n_k]
-    @n_n = CIPHERS[@aead_name][:n_n]
-    @n_t = CIPHERS[@aead_name][:n_t]
+    @aead_name = CIPHERS[cipher_name][:name]
+    @n_k = CIPHERS[cipher_name][:n_k]
+    @n_n = CIPHERS[cipher_name][:n_n]
+    @n_t = CIPHERS[cipher_name][:n_t]
   end
 
   # public facing APIs

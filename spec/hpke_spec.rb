@@ -28,15 +28,15 @@ RSpec.describe HPKE do
   test_vectors.each do |vec|
     context "mode #{vec['mode']}, DHKEM(#{KEMS[vec['kem_id']][0]}, #{KEMS[vec['kem_id']][1]}), HKDF(#{KDFS[vec['kdf_id']]}), #{AEAD_CIPHERS[vec['aead_id']]}" do
       it "instantiates a HPKE instance" do
-        hpke = HPKE.new(KEMS[vec['kem_id']][0], KEMS[vec['kem_id']][1], KDFS[vec['kdf_id']], AEAD_CIPHERS[vec['aead_id']])
+        hpke = HPKE.new(vec['kem_id'], vec['kdf_id'], vec['aead_id'])
         expect(hpke).to be_an_instance_of(HPKE)
       end
 
       context "DHKEM(#{KEMS[vec['kem_id']][0]}, #{KEMS[vec['kem_id']][1]})" do
         it "derives key pair as expected" do
-          ikme = [vec['ikmE']].pack('H*')
+          # ikme = [vec['ikmE']].pack('H*')
           ikmr = [vec['ikmR']].pack('H*')
-          hpke = HPKE.new(KEMS[vec['kem_id']][0], KEMS[vec['kem_id']][1], KDFS[vec['kdf_id']], AEAD_CIPHERS[vec['aead_id']])
+          hpke = HPKE.new(vec['kem_id'], vec['kdf_id'], vec['aead_id'])
           pkey_r = hpke.kem.derive_key_pair(ikmr)
           expect(hpke.kem.serialize_public_key(pkey_r).unpack1('H*')).to eq(vec['pkRm'])
         end
@@ -47,7 +47,7 @@ RSpec.describe HPKE do
           info = [vec['info']].pack('H*')
           ikme = [vec['ikmE']].pack('H*')
           ikmr = [vec['ikmR']].pack('H*')
-          hpke = HPKE.new(KEMS[vec['kem_id']][0], KEMS[vec['kem_id']][1], KDFS[vec['kdf_id']], AEAD_CIPHERS[vec['aead_id']])
+          hpke = HPKE.new(vec['kem_id'], vec['kdf_id'], vec['aead_id'])
           pkey_r = hpke.kem.derive_key_pair(ikmr)
           encap_result = case vec['mode']
           when 0
@@ -81,7 +81,7 @@ RSpec.describe HPKE do
         it "decapsulates as expected" do
           info = [vec['info']].pack('H*')
           ikmr = [vec['ikmR']].pack('H*')
-          hpke = HPKE.new(KEMS[vec['kem_id']][0], KEMS[vec['kem_id']][1], KDFS[vec['kdf_id']], AEAD_CIPHERS[vec['aead_id']])
+          hpke = HPKE.new(vec['kem_id'], vec['kdf_id'], vec['aead_id'])
           pkey_r = hpke.kem.derive_key_pair(ikmr)
           enc = [vec['enc']].pack('H*') 
           
@@ -110,7 +110,7 @@ RSpec.describe HPKE do
         end
 
         it "encrypts as expected" do
-          hpke = HPKE.new(KEMS[vec['kem_id']][0], KEMS[vec['kem_id']][1], KDFS[vec['kdf_id']], AEAD_CIPHERS[vec['aead_id']])
+          hpke = HPKE.new(vec['kem_id'], vec['kdf_id'], vec['aead_id'])
 
           info = [vec['info']].pack('H*')
           ikme = [vec['ikmE']].pack('H*')
