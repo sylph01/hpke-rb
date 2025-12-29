@@ -100,7 +100,8 @@ class HPKE
     encap_result = @kem.encap(pk_r)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:base], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID)
+      context_s: key_schedule_s(MODES[:base], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -113,7 +114,8 @@ class HPKE
     encap_result = @kem.encap(pk_r)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:psk], encap_result[:shared_secret], info, psk, psk_id)
+      context_s: key_schedule_s(MODES[:psk], encap_result[:shared_secret], info, psk, psk_id),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -126,7 +128,8 @@ class HPKE
     encap_result = @kem.auth_encap(pk_r, sk_s)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:auth], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID)
+      context_s: key_schedule_s(MODES[:auth], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -139,7 +142,8 @@ class HPKE
     encap_result = @kem.auth_encap(pk_r, sk_s)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:auth_psk], encap_result[:shared_secret], info, psk, psk_id)
+      context_s: key_schedule_s(MODES[:auth_psk], encap_result[:shared_secret], info, psk, psk_id),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -153,7 +157,8 @@ class HPKE
     encap_result = @kem.encap_fixed(pk_r, ikm_e)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:base], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID)
+      context_s: key_schedule_s(MODES[:base], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -161,7 +166,8 @@ class HPKE
     encap_result = @kem.encap_fixed(pk_r, ikm_e)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:psk], encap_result[:shared_secret], info, psk, psk_id)
+      context_s: key_schedule_s(MODES[:psk], encap_result[:shared_secret], info, psk, psk_id),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -169,7 +175,8 @@ class HPKE
     encap_result = @kem.auth_encap_fixed(pk_r, sk_s, ikm_e)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:auth], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID)
+      context_s: key_schedule_s(MODES[:auth], encap_result[:shared_secret], info, DEFAULT_PSK, DEFAULT_PSK_ID),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
@@ -177,7 +184,8 @@ class HPKE
     encap_result = @kem.auth_encap_fixed(pk_r, sk_s, ikm_e)
     {
       enc: encap_result[:enc],
-      context_s: key_schedule_s(MODES[:auth_psk], encap_result[:shared_secret], info, psk, psk_id)
+      context_s: key_schedule_s(MODES[:auth_psk], encap_result[:shared_secret], info, psk, psk_id),
+      shared_secret: encap_result[:shared_secret]
     }
   end
 
