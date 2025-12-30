@@ -68,6 +68,7 @@ RSpec.describe HPKE do
             hpke.setup_auth_psk_s_fixed(pkey_r, info, psk, psk_id, pkey_s, ikme)
           end
           expect(encap_result[:enc].unpack1('H*')).to eq(vec['enc'])
+          expect(encap_result[:shared_secret].unpack1('H*')).to eq(vec['shared_secret'])
 
           context_s = encap_result[:context_s]
 
