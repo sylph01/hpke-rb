@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hpke (1.0.0.pre.rc1)
+    hpke (1.0.0)
       openssl (~> 3.3.0, >= 3.0)
 
 GEM
@@ -34,4 +34,4 @@ DEPENDENCIES
   rspec (~> 3.0)
 
 BUNDLED WITH
-   2.4.10
+   2.7.1
