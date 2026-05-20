@@ -2,13 +2,13 @@ PATH
   remote: .
   specs:
     hpke (1.0.0)
-      openssl (~> 3.3.0, >= 3.0)
+      openssl (~> 4.0.0, >= 3.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.5.0)
-    openssl (3.3.0)
+    openssl (4.0.1)
     ostruct (0.6.3)
     rake (13.0.6)
     rspec (3.12.0)
@@ -27,6 +27,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-22
+  arm64-darwin-24
   x86_64-linux
 
 DEPENDENCIES
