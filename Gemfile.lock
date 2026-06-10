@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hpke (1.0.1)
+    hpke (1.0.2)
       openssl (~> 4.0.0, >= 3.0)
 
 GEM
